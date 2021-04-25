@@ -158,7 +158,7 @@ export function Player() {
           </button>
           <button
             type="button"
-            disabled={!episode}
+            disabled={!episode || !hasNext}
             onClick={toggleLoop}
             className={isLooping ? styles.isActive : ""}
           >
