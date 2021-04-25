@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, ReactNode, useState } from "react";
 
 type Episode = {
   title: string;
@@ -12,21 +12,38 @@ type PlayerContextData = {
   episodeList: Episode[];
   currentEpisodeIndex: number;
   isPlaying: boolean;
+  hasNext: boolean;
+  hasPrevious: boolean;
   play: (episode: Episode) => void;
   togglePlay: () => void;
   setPlayingState: (state: boolean) => void;
+  playList: (list: Episode[], index: number) => void;
+  playNext: () => void;
+  playPrevious: () => void;
+};
+
+type PlayerContextProviderProps = {
+  children: ReactNode;
 };
 
 export const PlayerContext = createContext({} as PlayerContextData);
 
-export default function PlayerContextProvider({ children }) {
+export default function PlayerContextProvider({
+  children,
+}: PlayerContextProviderProps) {
   const [episodeList, setEpisodeList] = useState([]);
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  function play(episode) {
+  function play(episode: Episode) {
     setEpisodeList([episode]);
     setCurrentEpisodeIndex(0);
+    setIsPlaying(true);
+  }
+
+  function playList(list: Episode[], index: number) {
+    setEpisodeList(list);
+    setCurrentEpisodeIndex(index);
     setIsPlaying(true);
   }
 
@@ -38,15 +55,35 @@ export default function PlayerContextProvider({ children }) {
     setIsPlaying(state);
   }
 
+  const hasNext = currentEpisodeIndex + 1 < episodeList.length;
+  const hasPrevious = currentEpisodeIndex > 0;
+
+  function playNext() {
+    if (hasNext) {
+      setCurrentEpisodeIndex(currentEpisodeIndex + 1);
+    }
+  }
+
+  function playPrevious() {
+    if (hasPrevious) {
+      setCurrentEpisodeIndex(currentEpisodeIndex - 1);
+    }
+  }
+
   return (
     <PlayerContext.Provider
       value={{
         episodeList,
         currentEpisodeIndex,
         isPlaying,
+        hasNext,
+        hasPrevious,
         play,
+        playNext,
+        playPrevious,
         togglePlay,
         setPlayingState,
+        playList,
       }}
     >
       {children}
